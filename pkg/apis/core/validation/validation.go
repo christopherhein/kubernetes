@@ -4255,11 +4255,17 @@ func ValidateServiceCreate(service *core.Service) field.ErrorList {
 func ValidateServiceUpdate(service, oldService *core.Service) field.ErrorList {
 	allErrs := ValidateObjectMetaUpdate(&service.ObjectMeta, &oldService.ObjectMeta, field.NewPath("metadata"))
 
-	// ClusterIP and IPFamily should be immutable for services using it (every type other than ExternalName)
+	// ClusterIP and IPFamily should be immutable for services using it (every type other than ExternalName unless ServiceClusterIPMutability enabled)
 	// which do not have ClusterIP assigned yet (empty string value)
 	if service.Spec.Type != core.ServiceTypeExternalName {
-		if oldService.Spec.Type != core.ServiceTypeExternalName && oldService.Spec.ClusterIP != "" {
-			allErrs = append(allErrs, ValidateImmutableField(service.Spec.ClusterIP, oldService.Spec.ClusterIP, field.NewPath("spec", "clusterIP"))...)
+		// check is feature flag is enabled
+		// if feature flag && ips match don't validate if
+		mutableServiceEnabled := utilfeature.DefaultFeatureGate.Enabled(features.ServiceClusterIPMutability)
+		clusterIPAnnotation := service.GetAnnotations()["transparency.tenancy.x-k8s.io/clusterIP"]
+		if !mutableServiceEnabled && clusterIPAnnotation != service.Spec.ClusterIP {
+			if oldService.Spec.Type != core.ServiceTypeExternalName && oldService.Spec.ClusterIP != "" {
+				allErrs = append(allErrs, ValidateImmutableField(service.Spec.ClusterIP, oldService.Spec.ClusterIP, field.NewPath("spec", "clusterIP"))...)
+			}
 		}
 		// notes:
 		// we drop the IPFamily field when the Dualstack gate is off.

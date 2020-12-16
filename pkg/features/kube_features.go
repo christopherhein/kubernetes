@@ -554,6 +554,12 @@ const (
 	// Enables AppProtocol field for Services and Endpoints.
 	ServiceAppProtocol featuregate.Feature = "ServiceAppProtocol"
 
+	// owner: @christopherhein
+	// alpha: v1.18
+	//
+	// Enables ClusterIPs to be mutable for an additional phase
+	ServiceClusterIPMutability featuregate.Feature = "ServiceClusterIPMutability"
+
 	// owner: @wojtek-t
 	// alpha: v1.18
 	//
@@ -672,6 +678,7 @@ var defaultKubernetesFeatureGates = map[featuregate.Feature]featuregate.FeatureS
 	PodDisruptionBudget:                            {Default: true, PreRelease: featuregate.Beta},
 	ServiceTopology:                                {Default: false, PreRelease: featuregate.Alpha},
 	ServiceAppProtocol:                             {Default: false, PreRelease: featuregate.Alpha},
+	ServiceClusterIPMutability: 					{Default: false, PreRelease: featuregate.Alpha},
 	ImmutableEphemeralVolumes:                      {Default: false, PreRelease: featuregate.Alpha},
 	DefaultIngressClass:                            {Default: true, PreRelease: featuregate.Beta},
 	HugePageStorageMediumSize:                      {Default: false, PreRelease: featuregate.Alpha},
